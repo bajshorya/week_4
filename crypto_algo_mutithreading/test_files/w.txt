@@ -1,1 +1,0 @@
-This is file w.txt with some test content.

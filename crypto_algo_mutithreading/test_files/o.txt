@@ -1,1 +1,0 @@
-This is file o.txt with some test content.

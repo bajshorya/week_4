@@ -1,1 +1,0 @@
-This is file t.txt with some test content.

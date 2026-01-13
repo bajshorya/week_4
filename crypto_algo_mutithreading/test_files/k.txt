@@ -1,1 +1,0 @@
-This is file k.txt with some test content.

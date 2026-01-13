@@ -2,3 +2,5 @@ target/
 node_modules/
 dist/
 .env
+crypto_algo_multithreading/test_files*/
+
