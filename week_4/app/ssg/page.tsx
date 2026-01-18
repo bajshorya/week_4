@@ -1,4 +1,6 @@
-export default async function SSR() {
+export const dynamic = "force-static";
+
+export default async function SSGPage() {
   const data = await fetch("http://localhost:3000/api/data").then((res) =>
     res.json()
   );
@@ -10,16 +12,15 @@ export default async function SSR() {
           <div className="mb-3 flex items-center gap-2">
             <div className="h-px w-8 bg-neutral-800"></div>
             <span className="text-[10px] font-mono tracking-wider text-neutral-700">
-              SSR
+              SSG
             </span>
           </div>
           <h1 className="mb-4 text-5xl font-extralight tracking-tight text-white">
-            Server-Side Rendering
+            Static Site Generation
           </h1>
           <p className="text-neutral-500 max-w-2xl leading-relaxed">
-            Content is rendered on the server for each request. This approach
-            provides fresh data and improved SEO while maintaining dynamic
-            capabilities.
+            Pages are pre-rendered at build time for optimal performance. This
+            approach delivers the fastest possible page loads with CDN caching.
           </p>
         </div>
 
@@ -28,19 +29,21 @@ export default async function SSR() {
             <div className="mb-3 text-[10px] font-mono tracking-wider text-neutral-700">
               METHOD
             </div>
-            <p className="text-sm font-light text-neutral-400">Server Render</p>
+            <p className="text-sm font-light text-neutral-400">Static Build</p>
           </div>
           <div className="border border-neutral-900/50 bg-neutral-950/20 p-6">
             <div className="mb-3 text-[10px] font-mono tracking-wider text-neutral-700">
               USE CASE
             </div>
-            <p className="text-sm font-light text-neutral-400">Dynamic Pages</p>
+            <p className="text-sm font-light text-neutral-400">
+              Static Content
+            </p>
           </div>
           <div className="border border-neutral-900/50 bg-neutral-950/20 p-6">
             <div className="mb-3 text-[10px] font-mono tracking-wider text-neutral-700">
               TIMING
             </div>
-            <p className="text-sm font-light text-neutral-400">Per Request</p>
+            <p className="text-sm font-light text-neutral-400">Build Time</p>
           </div>
         </div>
 
