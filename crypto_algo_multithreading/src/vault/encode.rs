@@ -14,11 +14,12 @@ pub fn run(files: Vec<PathBuf>, out: PathBuf, threads: usize) {
     let mut seed = [0u8; 32];
     rand::thread_rng().fill_bytes(&mut seed);
     println!("Seed (save this!): {}", hex::encode(seed));
+    println!("[ENCODE] Starting encryption with {} threads\n", threads);
 
     let seed = Arc::new(seed);
     let files = Arc::new(files);
     let out_dir = Arc::new(out.clone());
-    let leaves = Arc::new(Mutex::new(Vec::new()));
+    let leaves = Arc::new(Mutex::new(Vec::new())); 
 
     let mut handles = Vec::new();
 
@@ -29,14 +30,20 @@ pub fn run(files: Vec<PathBuf>, out: PathBuf, threads: usize) {
         let leaves = leaves.clone();
 
         handles.push(thread::spawn(move || {
+            let thread_id = thread::current().id();
             for j in (i..files.len()).step_by(threads) {
                 let mut buf = Vec::new();
                 File::open(&files[j])
                     .unwrap()
                     .read_to_end(&mut buf)
                     .unwrap();
-
+                
                 let path = format!("leaf_{}", j);
+                let file_name = files[j].file_name().unwrap().to_string_lossy();
+                println!(
+                    "[ENCODE] Thread {:?} is encrypting: {} -> {}",
+                    thread_id, file_name, path
+                );
                 let encrypted = encrypt(&seed[..], &path, &buf);
 
                 fs::write(
@@ -45,11 +52,13 @@ pub fn run(files: Vec<PathBuf>, out: PathBuf, threads: usize) {
                 )
                 .unwrap();
 
-                leaves.lock().unwrap().push(path);
+                leaves.lock().unwrap().push(path.clone());
+                println!("[ENCODE] Thread {:?} completed: {}", thread_id, path);
             }
         }));
     }
 
+    println!("\n[ENCODE] All file encryptions completed. Building merkle tree...");
     for h in handles {
         h.join().unwrap();
     }
@@ -72,7 +81,10 @@ fn build_tree(out: PathBuf, seed: Arc<[u8; 32]>, leaves: Arc<Mutex<Vec<String>>>
             let right = pair.get(1).unwrap_or(left);
             let data = format!("{}|{}", left, right).into_bytes();
             let path = format!("node_{}_{}", depth, i);
-
+            println!(
+                "[MERKLE_TREE] Encrypting node at depth {}: {} (children: {} + {})",
+                depth, path, left, right
+            );
             let enc = encrypt(&seed[..], &path, &data);
             fs::write(out.join("nodes").join(format!("{}.bin", path)), enc).unwrap();
             next.push(path);
@@ -81,6 +93,8 @@ fn build_tree(out: PathBuf, seed: Arc<[u8; 32]>, leaves: Arc<Mutex<Vec<String>>>
         level = next;
         depth += 1;
     }
+
+    println!("[MERKLE_TREE] Root node created: {}", level[0]);
 
     fs::write(out.join("root.commit"), level[0].as_bytes()).unwrap();
 }

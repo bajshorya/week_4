@@ -1,4 +1,4 @@
-export const revalidate = 10;
+export const revalidate = 10; // Revalidate every 10 seconds
 
 export default async function ISRPage() {
   const data = await fetch("http://localhost:3000/api/data", {
